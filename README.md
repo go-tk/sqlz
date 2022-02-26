@@ -1,5 +1,9 @@
 # sqlz
 
+[![GoDev](https://pkg.go.dev/badge/golang.org/x/pkgsite.svg)](https://pkg.go.dev/github.com/go-tk/sqlz)
+[![Workflow Status](https://github.com/go-tk/sqlz/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/go-tk/sqlz/actions)
+[![Coverage Status](https://codecov.io/gh/go-tk/sqlz/branch/main/graph/badge.svg)](https://codecov.io/gh/go-tk/sqlz)
+
 `sqlz` is an extremely simple alternative to [`sqlx`](https://github.com/jmoiron/sqlx),
 convenient helper for working with `database/sql`.
 
