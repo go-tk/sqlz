@@ -2,6 +2,7 @@ package sqlz_test
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"testing"
 
@@ -21,10 +22,7 @@ func TestStmt_Trim(t *testing.T) {
 }
 
 func TestStmt_Exec(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	mock.ExpectExec("insert into foo \\( a, b, c \\) values \\( \\?, \\?, \\? \\)").
 		WithArgs(1, 2, 3).
 		WillReturnResult(sqlmock.NewResult(99, 100))
@@ -48,10 +46,7 @@ func TestStmt_Exec(t *testing.T) {
 }
 
 func TestStmt_QueryRow(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	mock.ExpectQuery("select a, b, c from foo where a = \\? and b = \\?").
 		RowsWillBeClosed().
 		WithArgs(1, 2).
@@ -59,7 +54,7 @@ func TestStmt_QueryRow(t *testing.T) {
 			sqlmock.NewRows([]string{"a", "b", "c"}).
 				AddRow(1, 2, 3))
 	var a, b, c int
-	err = NewStmt("select").
+	err := NewStmt("select").
 		Append("a,").Scan(&a).
 		Append("b,").Scan(&b).
 		Append("c,").Scan(&c).
@@ -81,10 +76,7 @@ func TestStmt_QueryRow(t *testing.T) {
 }
 
 func TestStmt_Query(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	mock.ExpectQuery("select a, b, c from foo").
 		RowsWillBeClosed().
 		WillReturnRows(
@@ -100,7 +92,7 @@ func TestStmt_Query(t *testing.T) {
 	}
 	var temp Foo
 	var foos []Foo
-	err = NewStmt("select").
+	err := NewStmt("select").
 		Append("a,").Scan(&temp.A).
 		Append("b,").Scan(&temp.B).
 		Append("c,").Scan(&temp.C).
@@ -128,14 +120,11 @@ func TestStmt_Query(t *testing.T) {
 }
 
 func TestStmt_Exec_Failed(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	myErr := errors.New("failed")
 	mock.ExpectExec("insert into foo \\( a, b, c \\) values \\( 1, 2, 3 \\)").
 		WillReturnError(myErr)
-	_, err = NewStmt("insert into foo ( a, b, c ) values ( 1, 2, 3 )").
+	_, err := NewStmt("insert into foo ( a, b, c ) values ( 1, 2, 3 )").
 		Exec(context.Background(), db)
 	if !assert.Error(t, err) {
 		t.FailNow()
@@ -148,14 +137,11 @@ func TestStmt_Exec_Failed(t *testing.T) {
 }
 
 func TestStmt_QueryRow_Failed(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	myErr := errors.New("failed")
 	mock.ExpectQuery("select a, b, c from foo limit 1").
 		WillReturnError(myErr)
-	err = NewStmt("select a, b, c from foo limit 1").
+	err := NewStmt("select a, b, c from foo limit 1").
 		QueryRow(context.Background(), db)
 	if !assert.Error(t, err) {
 		t.FailNow()
@@ -168,14 +154,11 @@ func TestStmt_QueryRow_Failed(t *testing.T) {
 }
 
 func TestStmt_Query_Failed1(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	myErr := errors.New("failed")
 	mock.ExpectQuery("select a, b, c from foo").
 		WillReturnError(myErr)
-	err = NewStmt("select a, b, c from foo").
+	err := NewStmt("select a, b, c from foo").
 		Query(context.Background(), db, func() bool {
 			return true
 		})
@@ -190,17 +173,14 @@ func TestStmt_Query_Failed1(t *testing.T) {
 }
 
 func TestStmt_Query_Failed2(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	mock.ExpectQuery("select a, b, c from foo").
 		RowsWillBeClosed().
 		WillReturnRows(
 			sqlmock.NewRows([]string{"a", "b", "c"}).
 				AddRow(1, "hello", 2))
 	var a, b, c int
-	err = NewStmt("select a, b, c from foo").Scan(&a, &b, &c).
+	err := NewStmt("select a, b, c from foo").Scan(&a, &b, &c).
 		Query(context.Background(), db, func() bool {
 			return true
 		})
@@ -214,10 +194,7 @@ func TestStmt_Query_Failed2(t *testing.T) {
 }
 
 func TestStmt_Query_Failed3(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	myErr := errors.New("failed")
 	mock.ExpectQuery("select a, b, c from foo").
 		RowsWillBeClosed().
@@ -227,7 +204,7 @@ func TestStmt_Query_Failed3(t *testing.T) {
 				AddRow(4, 5, 6).
 				CloseError(myErr))
 	var a, b, c int
-	err = NewStmt("select a, b, c from foo").Scan(&a, &b, &c).
+	err := NewStmt("select a, b, c from foo").Scan(&a, &b, &c).
 		Query(context.Background(), db, func() bool {
 			return false
 		})
@@ -242,10 +219,7 @@ func TestStmt_Query_Failed3(t *testing.T) {
 }
 
 func TestStmt_Query_Failed4(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, mock := newMockDB(t)
 	myErr := errors.New("failed")
 	mock.ExpectQuery("select a, b, c from foo").
 		RowsWillBeClosed().
@@ -254,7 +228,7 @@ func TestStmt_Query_Failed4(t *testing.T) {
 				AddRow(1, 2, 3).
 				RowError(0, myErr))
 	var a, b, c int
-	err = NewStmt("select a, b, c from foo").Scan(&a, &b, &c).
+	err := NewStmt("select a, b, c from foo").Scan(&a, &b, &c).
 		Query(context.Background(), db, func() bool {
 			return false
 		})
@@ -266,4 +240,13 @@ func TestStmt_Query_Failed4(t *testing.T) {
 	}
 	assert.ErrorIs(t, err, myErr)
 	assert.EqualError(t, err, "iterate rows; sql=\"select a, b, c from foo\": failed")
+}
+
+func newMockDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Close() })
+	return db, mock
 }
