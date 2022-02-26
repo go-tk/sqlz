@@ -48,7 +48,7 @@ func main() {
                 panic(err)
         }
 
-        // Insert Persons in bulk
+        // 1. Insert Persons in bulk
         {
                 stmt := sqlz.NewStmt("INSERT INTO person ( first_name, last_name, age ) VALUES")
                 for _, person := range []Person{
@@ -65,15 +65,21 @@ func main() {
                 }
         }
 
-        // Get a single Person
-        {
-                var person Person
-                stmt := sqlz.NewStmt("SELECT").
+        // Define a helper function
+        selectPerson := func(person *Person) *sqlz.Stmt {
+                return sqlz.NewStmt("SELECT").
                         Append("first_name,").Scan(&person.FirstName).
                         Append("last_name,").Scan(&person.LastName).
                         Append("age,").Scan(&person.Age).
                         Trim(","). // Remove the trailing ','
-                        Append("FROM person WHERE").
+                        Append("FROM person")
+        }
+
+        // 2. Get a single Person
+        {
+                var person Person
+                stmt := selectPerson(&person).
+                        Append("WHERE").
                         Append("age BETWEEN ? AND ?").Format(12, 13).
                         Append("AND").
                         Append("last_name = ?").Format("Pan").
@@ -86,18 +92,14 @@ func main() {
                 // {Peter Pan 13}
         }
 
-        // Get all Persons
+        // 3. Get all Persons
         {
                 var temp Person
-                var persons []Person
-                stmt := sqlz.NewStmt("SELECT").
-                        Append("first_name,").Scan(&temp.FirstName).
-                        Append("last_name,").Scan(&temp.LastName).
-                        Append("age,").Scan(&temp.Age).
-                        Trim(","). // Remove the trailing ','
-                        Append("FROM person")
+                stmt := selectPerson(&temp).Append("LIMIT 100")
 
+                var persons []Person
                 if err := stmt.Query(context.Background(), db, func() bool {
+                        // be called back for each row
                         persons = append(persons, temp)
                         return true
                 }); err != nil {
