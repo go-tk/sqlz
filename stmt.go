@@ -115,5 +115,5 @@ func (s *Stmt) Query(ctx context.Context, queryer Queryer, callback func() bool)
 	return nil
 }
 
-// SQL returns the whole SQL.
+// SQL returns the underlying SQL to be executed.
 func (s *Stmt) SQL() string { return s.sqlBuffer.String() }
