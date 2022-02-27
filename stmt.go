@@ -53,7 +53,7 @@ func (s *Stmt) Format(args ...interface{}) *Stmt {
 	return s
 }
 
-// Execer is an interface implemented by sql.DB and sql.Tx.
+// Execer is an interface implemented by `sql.DB` and `sql.Tx`.
 type Execer interface {
 	ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error)
 }
@@ -70,7 +70,7 @@ func (s *Stmt) Exec(ctx context.Context, execer Execer) (sql.Result, error) {
 	return result, err
 }
 
-// Queryer is an interface implemented by sql.DB and sql.Tx.
+// Queryer is an interface implemented by `sql.DB` and `sql.Tx`.
 type Queryer interface {
 	QueryRowContext(ctx context.Context, query string, args ...interface{}) (row *sql.Row)
 	QueryContext(ctx context.Context, query string, args ...interface{}) (rows *sql.Rows, err error)
