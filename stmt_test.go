@@ -2,7 +2,6 @@ package sqlz_test
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"testing"
 
@@ -240,13 +239,4 @@ func TestStmt_Query_Failed4(t *testing.T) {
 	}
 	assert.ErrorIs(t, err, myErr)
 	assert.EqualError(t, err, "iterate rows; sql=\"select a, b, c from foo\": failed")
-}
-
-func newMockDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return db, mock
 }

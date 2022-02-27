@@ -64,4 +64,18 @@ func Test_BeginTx(t *testing.T) {
 		assert.EqualError(t, err, "commit tx: failed")
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
+	t.Run("5", func(t *testing.T) {
+		db, mock := newMockDB(t)
+		mock.ExpectBegin()
+		mock.ExpectRollback()
+		assert.Panics(t, func() {
+			_, closeTx, err := BeginTx(context.Background(), db, nil, nil)
+			if !assert.NoError(t, err) {
+				t.FailNow()
+			}
+			defer closeTx()
+			panic(struct{}{})
+		})
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
 }
