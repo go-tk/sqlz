@@ -9,7 +9,9 @@ convenient helper for working with `database/sql`.
 
 ## Usage
 
-The common use cases of `sqlz` are as follows.
+### Stmt
+
+The common use cases of `Stmt` are as follows:
 
 ```go
 package main
@@ -89,7 +91,7 @@ func main() {
                         panic(err)
                 }
                 fmt.Printf("%v\n", person)
-                // {Peter Pan 13}
+                // Output: {Peter Pan 13}
         }
 
         // 3. Get all Persons
@@ -99,14 +101,34 @@ func main() {
 
                 var persons []Person
                 if err := stmt.Query(context.Background(), db, func() bool {
-                        // be called back for each row
+                        // Be called back for each row
                         persons = append(persons, temp)
                         return true
                 }); err != nil {
                         panic(err)
                 }
                 fmt.Printf("%v\n", persons)
-                // [{Jason Moiron 12} {John Doe 9} {Peter Pan 13}]
+                // Output: [{Jason Moiron 12} {John Doe 9} {Peter Pan 13}]
         }
+}
+```
+
+### BeginTx
+
+See the comment in the code below:
+
+```go
+func DoSomething(ctx context.Context, db *sql.DB) (returnedErr error) {
+        tx, closeTx, err := sqlz.BeginTx(ctx, db, nil, &returnedErr)
+        if err != nil {
+                return err
+        }
+        defer closeTx() // Automatically call tx.Commit() or tx.Rollback() according to returnedErr
+        ...
+        if err != nil {
+                return err
+        }
+        ...
+        return nil
 }
 ```
