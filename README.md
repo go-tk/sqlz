@@ -7,6 +7,12 @@
 `sqlz` is an extremely simple alternative to [`sqlx`](https://github.com/jmoiron/sqlx),
 convenient helper for working with `database/sql`.
 
+## Motivation
+
+- I'm not a fan of ORM and code generation is not a choice to me.
+- I want to write maintainable and less bug prone SQL by hand.
+- Can't find a library for the same purpose that seems simple enough to me.
+
 ## Usage
 
 ### Stmt
