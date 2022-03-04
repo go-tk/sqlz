@@ -56,7 +56,7 @@ func main() {
                 panic(err)
         }
 
-        // 1. Insert Persons in bulk
+        // ===== 1. Insert Persons in bulk =====
         {
                 stmt := sqlz.NewStmt("INSERT INTO person ( first_name, last_name, age ) VALUES")
                 for _, person := range []Person{
@@ -73,7 +73,7 @@ func main() {
                 }
         }
 
-        // Define a helper function
+        // ===== 2. Define a helper function =====
         selectPerson := func(person *Person) *sqlz.Stmt {
                 return sqlz.NewStmt("SELECT").
                         Append("first_name,").Scan(&person.FirstName).
@@ -83,7 +83,7 @@ func main() {
                         Append("FROM person")
         }
 
-        // 2. Get a single Person
+        // ===== 3. Get a single Person =====
         {
                 var person Person
                 stmt := selectPerson(&person).
@@ -100,7 +100,7 @@ func main() {
                 // Output: {Peter Pan 13}
         }
 
-        // 3. Get all Persons
+        // ===== 4. Get all Persons =====
         {
                 var temp Person
                 stmt := selectPerson(&temp).Append("LIMIT 100")
