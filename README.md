@@ -5,12 +5,12 @@
 [![Coverage Status](https://codecov.io/gh/go-tk/sqlz/branch/main/graph/badge.svg)](https://codecov.io/gh/go-tk/sqlz/branch/main)
 
 `sqlz` is an extremely simple alternative to [`sqlx`](https://github.com/jmoiron/sqlx),
-convenient helper for working with `database/sql`.
+implemented in 100~ lines of code, no complicated logic, no reflection used.
 
 ## Motivation
 
 - I'm not a fan of ORM and code generation is not a choice to me.
-- I want to write maintainable and less bug prone SQL by hand.
+- I want to write SQL by hand in a maintainable and less bug-prone fashion.
 - Can't find a library for the same purpose that seems simple enough to me.
 
 ## Usage
